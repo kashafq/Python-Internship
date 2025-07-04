@@ -1,0 +1,8 @@
+Hajira,77
+Fatima,59
+Usman,	
+Alishba,88
+Kashaf,75
+Hamza,81
+Zubia,abc
+Rohaan,	
