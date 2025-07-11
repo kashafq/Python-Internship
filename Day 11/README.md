@@ -1,4 +1,4 @@
-# Day11_EmployeeManageSystem
+# Day11_EmployeeManagementSystem
 
 ## Objective
 Build a command-line-based Employee Record System using:
@@ -20,11 +20,10 @@ Build a command-line-based Employee Record System using:
 
 ---
 
-## 🗂 Folder Structure
+## Folder Structure
 Day 11/
 ├── employee.py # Employee class
 ├── manager.py # EmployeeManager class
-├── utils.py # Helper functions (like print_menu)
 ├── main.py # CLI loop and menu
 ├── employee_data.txt # Stores saved employees
 ├── employee_report.txt # Auto-generated summary report
