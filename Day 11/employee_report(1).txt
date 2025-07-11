@@ -1,0 +1,9 @@
+Employee Summary Report
+-----------------------
+Total Employees: 3
+Average Salary: Rs.203333.33
+
+List of Employees:
+Kashaf Qureshi (Hr) - Rs.200000.00 - Joined: 2022
+ (Ayesha) - Rs.210000.00 - Joined: 2021
+Zubia (Hr) - Rs.200000.00 - Joined: 2022
