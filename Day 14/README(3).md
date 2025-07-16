@@ -15,7 +15,7 @@ To load, clean, analyze, and visualize a sales dataset using `pandas`, `matplotl
 ---
 
 ## Folder Structure
-Sales-Data-Visualization/
+Day 14/
 ├── data_visualizer.py
 ├── Summary_Report.txt 
 └── plots/ 
