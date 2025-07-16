@@ -1,7 +1,5 @@
 # Sales Data Visualization – ProSensia Internship (Day 14 Task)
 
-This project is part of the **#ProSensiaInternship** Day 14 task, focused on exploring and visualizing sales data using Python.
-
 ## Objective
 To load, clean, analyze, and visualize a sales dataset using `pandas`, `matplotlib`, and `seaborn`. The goal was to uncover insights and present them using clear, effective visualizations.
 
