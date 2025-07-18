@@ -1,20 +1,41 @@
-# ✅ To-Do List Manager – CLI Tool
-A simple command-line Python app to manage your daily tasks!
+
+# To-Do List Manager – CLI Tool
+
+This is a simple, reusable command-line tool built with Python that helps you manage your daily tasks from the terminal.
+
+> Built for #ProSensiaInternship Day 16 Task  
+> Features: Add, View, Delete Tasks + Colored Output + Logs
 
 ---
 
-## 🧰 Features
-- Add, view, and delete tasks from terminal
-- Logs every action to `logs.txt`
-- Stores data in `todo_data.json`
+## Features
+
+- Add, view, and delete tasks from your to-do list
 - Colored terminal output using `colorama`
-- Easy CLI usage with `argparse`
-- Modular structure with `todo_utils.py`
+- Task data stored in `todo_data.json`
+- Action logs saved in `logs.txt`
+- Modular code structure (`cli_tool.py` and `todo_utils.py`)
+- Usage help messages built with `argparse`
 
 ---
 
-## 🚀 How to Use
+## How to Run
 
-### ✅ Add a task
-```bash
+Make sure you have Python installed (v3.6 or later).
+
+### 1. Install Requirements
+
+### 2. Run from Terminal
+
 python cli_tool.py add "Buy groceries"
+python cli_tool.py view
+python cli_tool.py delete 1
+
+Project Structure
+
+### CLI-Todo-Manager/
+├── cli_tool.py         # Main script with CLI argument parsing
+├── todo_utils.py       # Task and logging functions
+├── todo_data.json      # Stores the saved tasks
+├── logs.txt            # Records actions like add/delete
+└── README.md           # This file
