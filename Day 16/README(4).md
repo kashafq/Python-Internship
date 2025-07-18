@@ -33,9 +33,10 @@ python cli_tool.py delete 1
 
 Project Structure
 
-### CLI-Todo-Manager/
-├── cli_tool.py         # Main script with CLI argument parsing
-├── todo_utils.py       # Task and logging functions
-├── todo_data.json      # Stores the saved tasks
-├── logs.txt            # Records actions like add/delete
-└── README.md           # This file
+### Day 16/
+├── cli_tool.py       
+├── todo_utils.py       
+├── todo_data.json      
+├── logs.txt            
+└── README.md          
+
