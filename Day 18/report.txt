@@ -1,0 +1,10 @@
+--< Sales Summary >---
+Product: Headphones – Revenue: 19200
+Product: Keyboard – Revenue: 20400
+Product: Laptop – Revenue: 255000
+Product: Monitor – Revenue: 75000
+Product: Mouse – Revenue: 11900
+Product: Webcam – Revenue: 22500
+
+-- Total Revenue: 404000
+-- Top Product: Laptop
