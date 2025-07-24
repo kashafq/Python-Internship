@@ -43,7 +43,7 @@ def generate_report(df):
 
 #App UI
 st.set_page_config(page_title="Sales Report Generator", layout="centered")
-st.title("---< Sales Report Generator >---")
+st.title("Sales Report Generator")
 
 uploaded_file = st.file_uploader("Upload a CSV or Excel file", type=["csv", "xlsx"])
 
@@ -51,17 +51,17 @@ if uploaded_file is not None:
     df = load_data(uploaded_file)
     
     if df is not None:
-        st.subheader("-- Data Preview")
+        st.subheader("Data Preview")
         st.dataframe(df)
 
         df = calculate_revenue(df)
 
         report_text, product_revenue = generate_report(df)
 
-        st.subheader("-- Generated Report")
+        st.subheader("Generated Report")
         st.text(report_text)
 
-        st.subheader("-- Product Revenue Chart")
+        st.subheader("Product Revenue Chart")
         fig, ax = plt.subplots()
         product_revenue.plot(kind="bar", color="skyblue", ax=ax)
         ax.set_title("Product Revenue")
@@ -69,7 +69,7 @@ if uploaded_file is not None:
         ax.set_ylabel("Revenue")
         st.pyplot(fig)
 
-        st.download_button("+ Download Report", data=report_text, file_name="report.txt", mime="text/plain")
+        st.download_button("Download Report", data=report_text, file_name="report.txt", mime="text/plain")
 
 
 # In[ ]:
