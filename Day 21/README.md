@@ -24,4 +24,4 @@ This is a command-line Python application that fetches real-time news headlines 
 
 ## 📂 Files
    - interactive_api.py – main Python script
-   - news_log.txt – saved results S
+   - news_log.txt – saved results 
