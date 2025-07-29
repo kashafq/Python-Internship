@@ -3,58 +3,47 @@
 
 # In[1]:
 
-
 import streamlit as st
-from PyPDF2 import PdfReader
-from sumy.parsers.plaintext import PlaintextParser
-from sumy.nlp.tokenizers import Tokenizer
-from sumy.summarizers.lsa import LsaSummarizer
-import nltk
+import PyPDF2
+from transformers import pipeline
 
-nltk.download('punkt')
+# Summarizer pipeline
+summarizer = pipeline("summarization")
 
-#App Setup
-st.set_page_config(page_title="PDF to Notes", layout="centered")
-st.title("PDF to Notes – Auto-Summarize Your Lecture PDFs")
-st.markdown("Upload your class notes or assignments in PDF form and get clean, bullet-style summaries!")
-
-#Upload PDF
-uploaded_file = st.file_uploader("Choose a PDF file", type="pdf")
-
-#Extract text from PDF
-def extract_text_from_pdf(file):
-    reader = PdfReader(file)
-    full_text = ""
+# Extract text from uploaded PDF
+def extract_text_from_pdf(pdf_file):
+    reader = PyPDF2.PdfReader(pdf_file)
+    text = ""
     for page in reader.pages:
-        full_text += page.extract_text() + "\n"
-    return full_text
+        text += page.extract_text()
+    return text
 
-#Summarize Text
-def summarize_text(text, num_sentences=5):
-    parser = PlaintextParser.from_string(text, Tokenizer("english"))
-    summarizer = LsaSummarizer()
-    summary = summarizer(parser.document, num_sentences)
-    return [str(sentence) for sentence in summary]
+# Streamlit App UI
+st.set_page_config(page_title="PDF to Notes – Auto Summarizer", layout="centered")
+st.title("PDF to Notes – Auto Summarizer")
+st.markdown("Upload your lecture or assignment PDF and get summarized notes in seconds!")
 
-#Main Logic
-if uploaded_file:
-    st.success("PDF uploaded successfully!")
-    with st.spinner("Extracting and summarizing..."):
-        pdf_text = extract_text_from_pdf(uploaded_file)
-        if len(pdf_text.strip()) == 0:
-            st.error("Could not extract text. Try a different file.")
-        else:
-            summary = summarize_text(pdf_text, num_sentences=7)
-            st.markdown("###Summary:")
-            for sentence in summary:
-                st.write(f"• {sentence}")
+pdf_file = st.file_uploader("Upload your PDF file", type=["pdf"])
 
-            # Optional Download
-            if st.button("Download Summary as .txt"):
-                summary_text = "\n".join(summary)
-                st.download_button("Download Notes", summary_text, file_name="summary_notes.txt")
-else:
-    st.info("Upload a PDF file to begin1")
+if pdf_file:
+    with st.spinner("Extracting text..."):
+        pdf_text = extract_text_from_pdf(pdf_file)
+    
+    if len(pdf_text.strip()) == 0:
+        st.error("Could not extract text. Try a different file.")
+    else:
+        st.success("Text extracted successfully!")
+        st.markdown("#### Original Text Preview")
+        st.text_area("Raw Text", pdf_text[:2000] + "..." if len(pdf_text) > 2000 else pdf_text, height=200)
+
+        if st.button("Summarize"):
+            with st.spinner("Summarizing..."):
+                # Truncate to max model length
+                input_text = pdf_text[:3000]  # 3000 chars = ~800 tokens
+                summary = summarizer(input_text, max_length=150, min_length=50, do_sample=False)[0]['summary_text']
+                st.markdown("### Summary:")
+                st.success(summary)
+
 
 
 
