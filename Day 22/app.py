@@ -5,52 +5,59 @@
 
 import streamlit as st
 import PyPDF2
-from transformers import pipeline
+from sumy.parsers.plaintext import PlaintextParser
+from sumy.nlp.tokenizers import Tokenizer
+from sumy.summarizers.lsa import LsaSummarizer
+import traceback
 
-# Initialize summarizer
-summarizer = pipeline("summarization")
+# Page title and intro
+st.set_page_config(page_title="PDF to Notes – Auto Summarizer")
+st.title("PDF to Notes – Auto Summarizer")
+st.markdown("Upload a PDF file and get a summarized version of its content in seconds.")
 
-# Extract text from PDF
-def extract_text(pdf):
-    reader = PyPDF2.PdfReader(pdf)
-    text = ""
-    for page in reader.pages:
-        if page.extract_text():
-            text += page.extract_text()
-    return text
+# Upload section
+pdf = st.file_uploader("Upload your PDF file", type='pdf')
 
-# UI Settings
-st.set_page_config(page_title="PDF to Notes – Auto-Summarizer", layout="centered")
-st.title("PDF to Notes – Auto-Summarizer")
-st.markdown("Convert your lecture PDFs into quick notes using AI. Just upload, click, and get your summary.")
+# If a file is uploaded
+if pdf:
+    try:
+        # Extract text from the uploaded PDF
+        reader = PyPDF2.PdfReader(pdf)
+        extracted_text = ""
 
-pdf_file = st.file_uploader("Upload a PDF file", type=["pdf"])
+        for page in reader.pages:
+            extracted_text += page.extract_text() or ""
 
-if pdf_file:
-    with st.spinner("Extracting text..."):
-        text = extract_text(pdf_file)
+        # Check if there's any text
+        if not extracted_text.strip():
+            st.warning("No readable text found in the PDF. Please upload a text-based PDF.")
+        else:
+            st.success("Text extracted successfully!")
+            with st.expander("View Extracted Text"):
+                st.text_area("Extracted Text", extracted_text[:3000] + "...", height=300)
 
-    if not text.strip():
-        st.error("Couldn't extract any text. Please try another PDF.")
-    else:
-        st.success("Text extracted successfully!")
-        st.markdown("### Preview of PDF Content")
-        st.text_area("Extracted Text", text[:2000] + ("..." if len(text) > 2000 else ""), height=200)
+            # Let user choose how much summary they want
+            num_sentences = st.slider("Number of Sentences in Summary", min_value=1, max_value=10, value=3)
 
-        if st.button("Summarize Now"):
-            with st.spinner("Generating AI Summary..."):
+            # Summarize on button click
+            if st.button("Summarize"):
                 try:
-                    trimmed_text = text[:3000]  # Transformers work best under ~800 tokens
-                    summary = summarizer(trimmed_text, max_length=150, min_length=50, do_sample=False)[0]['summary_text']
-                    st.success("Summary Ready!")
-                    st.markdown("### Summary")
-                    st.write(summary)
+                    parser = PlaintextParser.from_string(extracted_text, Tokenizer("english"))
+                    summarizer = LsaSummarizer()
+                    summary = summarizer(parser.document, num_sentences)
 
-                    # Downloadable summary
-                    st.download_button("Download Summary", summary, file_name="summary.txt")
+                    st.subheader("Summary:")
+                    for i, sentence in enumerate(summary, 1):
+                        st.write(f"{i}. {sentence}")
 
-                except Exception as e:
-                    st.error(f"Error during summarization: {str(e)}")
+                except Exception:
+                    st.error("An error occurred during summarization.")
+                    st.code(traceback.format_exc())
+
+    except Exception:
+        st.error("Something went wrong while processing the file.")
+        st.code(traceback.format_exc())
+
 
 
 
