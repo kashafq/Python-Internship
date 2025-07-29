@@ -55,7 +55,7 @@ def generate_summary(text, num_sentences=5):  # Fixed typo in function name
     return ' '.join([sentences[i] for i, _ in top_sentences])
 
 def main():
-    st.title("PDF Summarizer Pro")
+    st.title("📄 PDF Summarizer Pro")
     st.markdown("Extracts key information from PDF documents")
     
     uploaded_file = st.file_uploader("Upload PDF", type="pdf")
