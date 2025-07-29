@@ -2,3 +2,6 @@ streamlit
 matplotlib
 pandas
 openpyxl
+PyPDF2
+fuzzywuzzy
+python-Levenshtein
