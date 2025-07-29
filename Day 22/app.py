@@ -9,6 +9,10 @@ from sumy.parsers.plaintext import PlaintextParser
 from sumy.nlp.tokenizers import Tokenizer
 from sumy.summarizers.lsa import LsaSummarizer
 import re
+import nltk
+
+# Download required NLTK data
+nltk.download('punkt')
 
 def extract_text_from_pdf(pdf_file):
     pdf_reader = PdfReader(pdf_file)
@@ -23,13 +27,17 @@ def clean_text(text):
     return text
 
 def generate_summary(text, sentences_count=5):
-    parser = PlaintextParser.from_string(text, Tokenizer("english"))
-    summarizer = LsaSummarizer()
-    summary = summarizer(parser.document, sentences_count)
-    return ' '.join([str(sentence) for sentence in summary])
+    try:
+        parser = PlaintextParser.from_string(text, Tokenizer("english"))
+        summarizer = LsaSummarizer()
+        summary = summarizer(parser.document, sentences_count)
+        return ' '.join([str(sentence) for sentence in summary])
+    except Exception as e:
+        st.error(f"Error generating summary: {str(e)}")
+        return "Could not generate summary. The text might be too short."
 
 def main():
-    st.title("📄 PDF Text Extractor & Summarizer")
+    st.title("PDF Text Extractor & Summarizer")
     st.write("Upload a PDF file to extract text and get a summary")
     
     uploaded_file = st.file_uploader("Choose a PDF file", type="pdf")
@@ -38,8 +46,9 @@ def main():
         st.success("File uploaded successfully!")
         
         # Extract text
-        raw_text = extract_text_from_pdf(uploaded_file)
-        cleaned_text = clean_text(raw_text)
+        with st.spinner("Extracting text..."):
+            raw_text = extract_text_from_pdf(uploaded_file)
+            cleaned_text = clean_text(raw_text)
         
         # Display raw text
         st.subheader("Extracted Text")
@@ -47,17 +56,21 @@ def main():
             st.text(cleaned_text)
         
         # Generate and display summary
-        st.subheader("Summary")
-        summary = generate_summary(cleaned_text)
-        st.write(summary)
-        
-        # Download button for summary
-        st.download_button(
-            label="Download Summary as TXT",
-            data=summary,
-            file_name="summary.txt",
-            mime="text/plain"
-        )
+        if len(cleaned_text.split()) > 50:  # Only summarize if enough text
+            st.subheader("Summary")
+            with st.spinner("Generating summary..."):
+                summary = generate_summary(cleaned_text)
+            st.write(summary)
+            
+            # Download button for summary
+            st.download_button(
+                label="Download Summary as TXT",
+                data=summary,
+                file_name="summary.txt",
+                mime="text/plain"
+            )
+        else:
+            st.warning("The document doesn't contain enough text to generate a meaningful summary.")
 
 if __name__ == "__main__":
     main()
