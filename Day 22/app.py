@@ -23,12 +23,12 @@ def extract_text_from_pdf(pdf_file):
     pdf_reader = PdfReader(pdf_file)
     return " ".join([page.extract_text() for page in pdf_reader.pages])
 
-def clean_text(text):
+def clean_and_preprocess(text):  # Renamed this function
     text = re.sub(r'\s+', ' ', text).strip()
     text = re.sub(r'\[.*?\]', '', text)
     return text
 
-def generate_summary(text, num_sentences=5):
+def generate_summary(text, num_sentences=5):  # Fixed typo in function name
     sentences = sent_tokenize(text)
     if len(sentences) < 2:
         return text[:500] + "..." if len(text) > 500 else text
@@ -55,21 +55,21 @@ def generate_summary(text, num_sentences=5):
     return ' '.join([sentences[i] for i, _ in top_sentences])
 
 def main():
-    st.title("📄 PDF Summarizer Pro")
+    st.title("PDF Summarizer Pro")
     st.markdown("Extracts key information from PDF documents")
     
     uploaded_file = st.file_uploader("Upload PDF", type="pdf")
     
     if uploaded_file:
         with st.spinner("Processing document..."):
-            text = extract_text_from_pdf(uploaded_file)
-            clean_text = clean_text(text)
+            raw_text = extract_text_from_pdf(uploaded_file)
+            processed_text = clean_and_preprocess(raw_text)  # Using new function name
             
-            if len(clean_text.split()) < 30:
+            if len(processed_text.split()) < 30:
                 st.warning("Document is too short for summarization")
-                st.text_area("Extracted Text", clean_text, height=200)
+                st.text_area("Extracted Text", processed_text, height=200)
             else:
-                summary = generate_summary(clean_text)
+                summary = generate_summary(processed_text)
                 st.subheader("Summary")
                 st.write(summary)
                 
