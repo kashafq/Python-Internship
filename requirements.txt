@@ -5,3 +5,5 @@ openpyxl
 PyPDF2
 transformers
 torch
+PyPDF2
+sumy
