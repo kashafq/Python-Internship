@@ -4,56 +4,61 @@
 # In[1]:
 
 import streamlit as st
-import PyPDF2
+from PyPDF2 import PdfReader
 from sumy.parsers.plaintext import PlaintextParser
 from sumy.nlp.tokenizers import Tokenizer
 from sumy.summarizers.lsa import LsaSummarizer
-import nltk
-import traceback
+import re
 
-# Download NLTK tokenizer
-nltk.download("punkt")
+def extract_text_from_pdf(pdf_file):
+    pdf_reader = PdfReader(pdf_file)
+    text = ""
+    for page in pdf_reader.pages:
+        text += page.extract_text()
+    return text
 
-# Streamlit UI
-st.set_page_config(page_title="PDF to Notes – Auto Summarizer")
-st.title("PDF to Notes – Auto Summarizer")
-st.markdown("Upload a PDF file and get a summarized version of its content in seconds.")
+def clean_text(text):
+    # Remove excessive whitespace and newlines
+    text = re.sub(r'\s+', ' ', text).strip()
+    return text
 
-# Upload section
-pdf = st.file_uploader("Upload your PDF file", type='pdf')
+def generate_summary(text, sentences_count=5):
+    parser = PlaintextParser.from_string(text, Tokenizer("english"))
+    summarizer = LsaSummarizer()
+    summary = summarizer(parser.document, sentences_count)
+    return ' '.join([str(sentence) for sentence in summary])
 
-if pdf:
-    try:
+def main():
+    st.title("📄 PDF Text Extractor & Summarizer")
+    st.write("Upload a PDF file to extract text and get a summary")
+    
+    uploaded_file = st.file_uploader("Choose a PDF file", type="pdf")
+    
+    if uploaded_file is not None:
+        st.success("File uploaded successfully!")
+        
         # Extract text
-        reader = PyPDF2.PdfReader(pdf)
-        extracted_text = ""
+        raw_text = extract_text_from_pdf(uploaded_file)
+        cleaned_text = clean_text(raw_text)
+        
+        # Display raw text
+        st.subheader("Extracted Text")
+        with st.expander("View raw extracted text"):
+            st.text(cleaned_text)
+        
+        # Generate and display summary
+        st.subheader("Summary")
+        summary = generate_summary(cleaned_text)
+        st.write(summary)
+        
+        # Download button for summary
+        st.download_button(
+            label="Download Summary as TXT",
+            data=summary,
+            file_name="summary.txt",
+            mime="text/plain"
+        )
 
-        for page in reader.pages:
-            extracted_text += page.extract_text() or ""
+if __name__ == "__main__":
+    main()
 
-        if not extracted_text.strip():
-            st.warning("No readable text found in the PDF. Please upload a text-based PDF.")
-        else:
-            st.success("Text extracted successfully!")
-            with st.expander("View Extracted Text"):
-                st.text_area("Extracted Text", extracted_text[:3000] + "...", height=300)
-
-            num_sentences = st.slider("Number of Sentences in Summary", min_value=1, max_value=10, value=3)
-
-            if st.button("Summarize"):
-                try:
-                    parser = PlaintextParser.from_string(extracted_text, Tokenizer("english"))
-                    summarizer = LsaSummarizer()
-                    summary = summarizer(parser.document, num_sentences)
-
-                    st.subheader("Summary:")
-                    for i, sentence in enumerate(summary, 1):
-                        st.write(f"{i}. {sentence}")
-
-                except Exception:
-                    st.error("An error occurred during summarization.")
-                    st.code(traceback.format_exc())
-
-    except Exception:
-        st.error("Something went wrong while processing the file.")
-        st.code(traceback.format_exc())
