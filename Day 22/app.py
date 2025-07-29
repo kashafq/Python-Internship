@@ -6,7 +6,6 @@
 import streamlit as st
 from PyPDF2 import PdfReader
 import re
-from transformers import pipeline
 import nltk
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize, sent_tokenize
@@ -20,36 +19,51 @@ def extract_text_from_pdf(pdf_file):
     return " ".join([page.extract_text() for page in pdf_reader.pages])
 
 def preprocess_text(text):
-    """Clean and prepare text for summarization"""
+    """Clean text for summarization"""
     text = re.sub(r'\s+', ' ', text).strip()  # Remove extra spaces
     text = re.sub(r'\[.*?\]', '', text)  # Remove citations
     return text
 
-def generate_quality_summary(text, num_sentences=5):
-    """Improved summarization using key sentence extraction"""
-    # Load modern summarization model
-    summarizer = pipeline("summarization", model="facebook/bart-large-cnn")
+def generate_summary(text, num_sentences=5):
+    """Improved summarization using NLTK"""
+    sentences = sent_tokenize(text)
+    words = word_tokenize(text.lower())
     
-    # Chunking for long documents (BART has 1024 token limit)
-    max_chunk = 1000
-    chunks = [text[i:i+max_chunk] for i in range(0, len(text), max_chunk)]
+    # Remove stopwords and punctuation
+    stop_words = set(stopwords.words('english') + ['.', ',', '!', '?'])
+    words = [word for word in words if word not in stop_words]
     
-    # Generate summary for each chunk
-    summary = []
-    for chunk in chunks:
-        result = summarizer(chunk, max_length=130, min_length=30, do_sample=False)
-        summary.append(result[0]['summary_text'])
+    # Frequency analysis
+    freq_dist = nltk.FreqDist(words)
     
-    return " ".join(summary)
+    # Score sentences
+    sentence_scores = {}
+    for i, sentence in enumerate(sentences):
+        for word in word_tokenize(sentence.lower()):
+            if word in freq_dist:
+                if i not in sentence_scores:
+                    sentence_scores[i] = freq_dist[word]
+                else:
+                    sentence_scores[i] += freq_dist[word]
+    
+    # Get top sentences
+    if not sentence_scores:
+        return "Could not generate meaningful summary."
+    
+    top_sentences = sorted(sentence_scores.items(), 
+                          key=lambda x: x[1], reverse=True)[:num_sentences]
+    top_sentences = sorted(top_sentences, key=lambda x: x[0])
+    
+    return ' '.join([sentences[i] for i, score in top_sentences])
 
 def main():
-    st.title("📄 Smart PDF Summarizer")
-    st.markdown("Upload a PDF for **coherent, well-structured** summaries")
+    st.title("PDF Summarizer")
+    st.markdown("Upload a PDF for **concise summaries** (Streamlit Cloud compatible)")
     
     uploaded_file = st.file_uploader("Choose PDF", type="pdf")
     
     if uploaded_file:
-        with st.spinner("Analyzing document..."):
+        with st.spinner("Processing document..."):
             raw_text = extract_text_from_pdf(uploaded_file)
             clean_text = preprocess_text(raw_text)
             
@@ -57,16 +71,15 @@ def main():
                 st.warning("Document too short for meaningful summary")
                 return
                 
-            summary = generate_quality_summary(clean_text)
+            summary = generate_summary(clean_text)
         
-        st.subheader("Key Points")
+        st.subheader("Summary")
         st.write(summary)
         
-        # Improved download option
         st.download_button(
-            label="📥 Download Summary",
+            label="Download Summary",
             data=summary,
-            file_name="document_summary.txt",
+            file_name="summary.txt",
             mime="text/plain"
         )
 
