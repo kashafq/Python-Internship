@@ -5,73 +5,70 @@
 
 import streamlit as st
 from PyPDF2 import PdfReader
-from sumy.parsers.plaintext import PlaintextParser
-from sumy.nlp.tokenizers import Tokenizer
-from sumy.summarizers.lsa import LsaSummarizer
 import re
+from transformers import pipeline
 import nltk
+from nltk.corpus import stopwords
+from nltk.tokenize import word_tokenize, sent_tokenize
 
 # Download required NLTK data
 nltk.download('punkt')
+nltk.download('stopwords')
 
 def extract_text_from_pdf(pdf_file):
     pdf_reader = PdfReader(pdf_file)
-    text = ""
-    for page in pdf_reader.pages:
-        text += page.extract_text()
+    return " ".join([page.extract_text() for page in pdf_reader.pages])
+
+def preprocess_text(text):
+    """Clean and prepare text for summarization"""
+    text = re.sub(r'\s+', ' ', text).strip()  # Remove extra spaces
+    text = re.sub(r'\[.*?\]', '', text)  # Remove citations
     return text
 
-def clean_text(text):
-    # Remove excessive whitespace and newlines
-    text = re.sub(r'\s+', ' ', text).strip()
-    return text
-
-def generate_summary(text, sentences_count=5):
-    try:
-        parser = PlaintextParser.from_string(text, Tokenizer("english"))
-        summarizer = LsaSummarizer()
-        summary = summarizer(parser.document, sentences_count)
-        return ' '.join([str(sentence) for sentence in summary])
-    except Exception as e:
-        st.error(f"Error generating summary: {str(e)}")
-        return "Could not generate summary. The text might be too short."
+def generate_quality_summary(text, num_sentences=5):
+    """Improved summarization using key sentence extraction"""
+    # Load modern summarization model
+    summarizer = pipeline("summarization", model="facebook/bart-large-cnn")
+    
+    # Chunking for long documents (BART has 1024 token limit)
+    max_chunk = 1000
+    chunks = [text[i:i+max_chunk] for i in range(0, len(text), max_chunk)]
+    
+    # Generate summary for each chunk
+    summary = []
+    for chunk in chunks:
+        result = summarizer(chunk, max_length=130, min_length=30, do_sample=False)
+        summary.append(result[0]['summary_text'])
+    
+    return " ".join(summary)
 
 def main():
-    st.title("PDF Text Extractor & Summarizer")
-    st.write("Upload a PDF file to extract text and get a summary")
+    st.title("📄 Smart PDF Summarizer")
+    st.markdown("Upload a PDF for **coherent, well-structured** summaries")
     
-    uploaded_file = st.file_uploader("Choose a PDF file", type="pdf")
+    uploaded_file = st.file_uploader("Choose PDF", type="pdf")
     
-    if uploaded_file is not None:
-        st.success("File uploaded successfully!")
-        
-        # Extract text
-        with st.spinner("Extracting text..."):
+    if uploaded_file:
+        with st.spinner("Analyzing document..."):
             raw_text = extract_text_from_pdf(uploaded_file)
-            cleaned_text = clean_text(raw_text)
-        
-        # Display raw text
-        st.subheader("Extracted Text")
-        with st.expander("View raw extracted text"):
-            st.text(cleaned_text)
-        
-        # Generate and display summary
-        if len(cleaned_text.split()) > 50:  # Only summarize if enough text
-            st.subheader("Summary")
-            with st.spinner("Generating summary..."):
-                summary = generate_summary(cleaned_text)
-            st.write(summary)
+            clean_text = preprocess_text(raw_text)
             
-            # Download button for summary
-            st.download_button(
-                label="Download Summary as TXT",
-                data=summary,
-                file_name="summary.txt",
-                mime="text/plain"
-            )
-        else:
-            st.warning("The document doesn't contain enough text to generate a meaningful summary.")
+            if len(clean_text.split()) < 50:
+                st.warning("Document too short for meaningful summary")
+                return
+                
+            summary = generate_quality_summary(clean_text)
+        
+        st.subheader("Key Points")
+        st.write(summary)
+        
+        # Improved download option
+        st.download_button(
+            label="📥 Download Summary",
+            data=summary,
+            file_name="document_summary.txt",
+            mime="text/plain"
+        )
 
 if __name__ == "__main__":
     main()
-
