@@ -30,9 +30,9 @@ You can take one using `Snipping Tool` or `PrintScreen` and paste it here.
 > [Download Python](https://www.python.org/downloads/)
 
 ### 2. Clone this Repository or Copy Files
-```bash
 git clone https://github.com/your-username/TaskManager.git
 cd TaskManager
+
 ### 3. Run the App
 python task_manager.py
 
