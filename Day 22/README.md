@@ -34,6 +34,8 @@ cd TaskManager
 ### 3. Run the App
 python task_manager.py
 
+---
+
 ## Project Structure
 TaskManager/
 
