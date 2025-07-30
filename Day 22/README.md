@@ -28,16 +28,15 @@ You can take one using `Snipping Tool` or `PrintScreen` and paste it here.
 
 ### 1. Install Python (if not already installed)  
 > [Download Python](https://www.python.org/downloads/)
-
 ### 2. Clone this Repository or Copy Files
 git clone https://github.com/your-username/TaskManager.git
 cd TaskManager
-
 ### 3. Run the App
 python task_manager.py
 
-### Project Structure
+## Project Structure
 TaskManager/
+
 ├── task_manager.py     
 ├── tasks.json          
 └── README.md         
