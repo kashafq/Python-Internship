@@ -16,6 +16,7 @@
 capstone_project/
   ├──setup.py
   └──arcade_hub/
+  
     │── main.py # App entry point
     ├── __init__.py
 
@@ -78,4 +79,5 @@ Tkinter (pre-installed with Python)
 
 - Kashaf Qureshi
 - Zubia Tanoli
+
 - Umama Jadoon
