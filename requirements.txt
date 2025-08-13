@@ -4,3 +4,5 @@ pandas
 openpyxl
 PyPDF2==3.0.1
 nltk==3.8.1
+groq
+python-dotenv
