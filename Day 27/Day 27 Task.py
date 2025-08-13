@@ -15,7 +15,7 @@ from dotenv import load_dotenv
 from groq import Groq
 
 # Load API key
-load_dotenv("env.txt")
+load_dotenv()
 api_key = os.getenv("GROQ_API_KEY")
 
 # Client setup
